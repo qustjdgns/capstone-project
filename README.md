@@ -1,4 +1,4 @@
-#  AI Vision Model Trainer API (FastAPI + PyTorch) GitHub 보고서
+#  AI Vision Model Trainer API 
 
 ## 1. 프로젝트 개요 및 목적
 
