@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision Platform | 커스텀 이미지 분류 솔루션</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --primary-color: #34495e; /* Midnight Blue */
+            --secondary-color: #1abc9c; /* Turquoise */
+            --dark-color: #2c3e50; /* Wet Asphalt */
+            --light-color: #f5f7fa; /* Whisper */
+            --text-color: #555;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes gradientAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        body { font-family: 'Inter', sans-serif; background-color: var(--light-color); color: var(--text-color); animation: fadeIn 0.8s ease-out; }
+        .navbar { box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
+        .hero { background: linear-gradient(-45deg, #2c3e50, #34495e, #1abc9c, #2c3e50); background-size: 400% 400%; color: white; padding: 5rem 0; border-radius: 0 0 40px 40px; animation: gradientAnimation 15s ease infinite; }
+        .card { border: 1px solid #eef2f5; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.07); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
+        .card-header { background-color: transparent; border-bottom: 0; padding: 2rem 2rem 0; font-size: 1.75rem; font-weight: 700; color: var(--dark-color); }
+        .step-badge { display: inline-block; background-color: var(--primary-color); color: white; padding: 0.5rem 1.25rem; border-radius: 50px; font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem; letter-spacing: 0.5px; }
+        .btn { padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 7px 20px rgba(0,0,0,0.15); }
+        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .btn-secondary { background-color: var(--secondary-color); border-color: var(--secondary-color); }
+        .form-label { font-weight: 600; color: var(--dark-color); }
+        .form-control { border-radius: 10px; padding: 0.75rem 1rem; border: 1px solid #dfe6e9; }
+        .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(52, 73, 94, 0.1); border-color: var(--primary-color); }
+        #log-output { background-color: #2c3e50; font-family: 'Courier New', Courier, monospace; border-radius: 10px; font-size: 0.9rem; min-height: 200px; }
+        #preview-image { max-width: 100%; max-height: 300px; height: auto; border-radius: 15px; border: 5px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .result-box { font-size: 2rem; font-weight: 700; }
+        .confidence-bar { height: 12px; border-radius: 6px; }
+        footer { padding: 3rem 0; text-align: center; font-size: 0.9rem; color: #aaa; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container"><a class="navbar-brand fw-bold" href="#" style="color: var(--dark-color); font-size: 1.5rem;"><i class="bi bi-robot me-2" style="color: var(--primary-color);"></i>AI Vision Platform</a></div>
+    </nav>
+    <header class="hero text-center mb-5">
+        <div class="container"><h1 class="display-4 fw-bold">Custom AI Vision Solution</h1><p class="lead col-md-8 mx-auto">No-code platform for creating powerful deep learning image classifiers.</p></div>
+    </header>
+    <div class="container my-5">
+        <div class="card mb-5">
+            <div class="card-header"><span class="step-badge">Step 1</span> Train Your Model</div>
+            <div class="card-body p-4 p-md-5">
+                <form id="train-form">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3"><label for="label1" class="form-label">Class 1 Name</label><input type="text" class="form-control" id="label1" placeholder="e.g., Bird" required></div>
+                            <div class="mb-3"><label for="files1" class="form-label">Class 1 Images</label><input class="form-control" type="file" id="files1" multiple required></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3"><label for="label2" class="form-label">Class 2 Name</label><input type="text" class="form-control" id="label2" placeholder="e.g., Drone" required></div>
+                            <div class="mb-3"><label for="files2" class="form-label">Class 2 Images</label><input class="form-control" type="file" id="files2" multiple required></div>
+                        </div>
+                    </div>
+
+                    <!-- === 학습 횟수(Epoch) 조절 슬라이더 추가 === -->
+                    <div class="mt-4">
+                        <label for="epochs" class="form-label">Training Iterations (Epochs): <span id="epochs-value" class="fw-bold">10</span></label>
+                        <input type="range" class="form-range" min="5" max="30" step="5" id="epochs" value="10">
+                    </div>
+                    <!-- ======================================= -->
+
+                    <div class="d-grid mt-4"><button type="submit" class="btn btn-primary" id="submit-btn"><span id="btn-text"><i class="bi bi-fire me-2"></i>Start Training</span><div class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status" id="spinner"></div></button></div>
+                </form>
+                <div class="mt-5">
+                    <h5 class="mb-3 fw-bold"><i class="bi bi-terminal me-2"></i>Training Log</h5>
+                    <pre id="log-output" class="p-3 text-white">Training process will be displayed here.</pre>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="step-badge" style="background-color: var(--secondary-color);">Step 2</span> Test Your Model</div>
+            <div class="card-body p-4 p-md-5">
+                <form id="predict-form">
+                    <div class="mb-3"><label for="predict-file" class="form-label">Select an image to classify</label><input class="form-control" type="file" id="predict-file" required></div>
+                    <div class="d-grid mt-4"><button type="submit" class="btn btn-secondary" id="predict-btn"><i class="bi bi-search me-2"></i>Classify Image</button></div>
+                </form>
+                <div id="result-area" class="text-center mt-5 d-none">
+                    <img id="preview-image" src="#" alt="Preview"/>
+                    <h5 class="mt-4 fw-bold">Classification Result</h5>
+                    <div id="prediction-output" class="p-3 bg-light rounded result-box mt-3" style="color: var(--primary-color) !important;"></div>
+                    <div class="mt-3 px-md-5"><div class="d-flex justify-content-between"><small>Confidence Score</small><small id="confidence-text">0%</small></div><div class="progress confidence-bar"><div id="confidence-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--secondary-color);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="mt-5"><p>&copy; 2025 AI Vision Platform. A No-Code Solution for Custom Deep Learning Models.</p></footer>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // Epoch 슬라이더 값 표시 업데이트
+        $('#epochs').on('input', function() {
+            $('#epochs-value').text($(this).val());
+        });
+
+        // --- 학습 폼 제출 이벤트 처리 ---
+        $('#train-form').on('submit', function(e) {
+            e.preventDefault();
+            const $submitBtn = $('#submit-btn');
+            const $btnText = $('#btn-text');
+            const $spinner = $('#spinner');
+            const $logOutput = $('#log-output');
+
+            $submitBtn.prop('disabled', true);
+            $btnText.html('<i class="bi bi-fire me-2"></i>Training...');
+            $spinner.removeClass('d-none');
+            $logOutput.text('Uploading data to the server...\nThis may take a moment depending on the number of images.');
+
+            const formData = new FormData();
+            formData.append('label1', $('#label1').val());
+            formData.append('label2', $('#label2').val());
+            formData.append('epochs', $('#epochs').val()); // Epoch 값 추가
+            $.each($('#files1')[0].files, function(i, file) { formData.append('files1', file); });
+            $.each($('#files2')[0].files, function(i, file) { formData.append('files2', file); });
+
+            $.ajax({
+                url: 'http://127.0.0.1:8000/train',
+                type: 'POST', data: formData, processData: false, contentType: false,
+                success: function(response) {
+                    $logOutput.text(response.log.join('\n'));
+                    alert(response.message);
+                },
+                error: function(jqXHR) {
+                    let errorMsg = 'Training Error:\n' + (jqXHR.responseJSON ? jqXHR.responseJSON.detail : 'Could not connect to the server.');
+                    $logOutput.text(errorMsg);
+                    alert('An error occurred. Please check the log.');
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false);
+                    $btnText.html('<i class="bi bi-fire me-2"></i>Start Training');
+                    $spinner.addClass('d-none');
+                }
+            });
+        });
+
+        // --- 예측 폼 제출 이벤트 처리 ---
+        $('#predict-form').on('submit', function(e) {
+            e.preventDefault();
+            const fileInput = $('#predict-file')[0];
+            if (fileInput.files.length === 0) {
+                alert('Please select a file to classify.'); return;
+            }
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            const reader = new FileReader();
+            reader.onload = function(e) { $('#preview-image').attr('src', e.target.result); }
+            reader.readAsDataURL(fileInput.files[0]);
+            const $resultArea = $('#result-area');
+            const $predictionOutput = $('#prediction-output');
+            const $confidenceProgress = $('#confidence-progress');
+            const $confidenceText = $('#confidence-text');
+            $resultArea.removeClass('d-none');
+            $predictionOutput.html('Analyzing...');
+            $confidenceProgress.css('width', '0%').attr('aria-valuenow', 0);
+            $confidenceText.text('0%');
+            $.ajax({
+                url: 'http://127.0.0.1:8000/predict',
+                type: 'POST', data: formData, processData: false, contentType: false,
+                success: function(response) {
+                    const confidence = response.confidence * 100;
+                    $predictionOutput.html(response.prediction);
+                    $confidenceProgress.css('width', confidence.toFixed(2) + '%').attr('aria-valuenow', confidence);
+                    $confidenceText.text(confidence.toFixed(2) + '%');
+                },
+                error: function(jqXHR) {
+                    const errorMsg = jqXHR.responseJSON ? jqXHR.responseJSON.detail : 'Could not connect to the server.';
+                    $predictionOutput.html(`<span class="text-danger">${errorMsg}</span>`);
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
