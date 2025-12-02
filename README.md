@@ -106,7 +106,7 @@ Test Accuracy를 측정합니다.
 trained_model.pth로 저장합니다.
 
 
-##5. 프로젝트의 장점
+## 5. 프로젝트의 장점
 
 ### 신속한 AI 서비스 구축:
 FastAPI의 비동기 처리와 PyTorch의 딥러닝 기능을 결합하여,
