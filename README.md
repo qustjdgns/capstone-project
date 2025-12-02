@@ -28,7 +28,7 @@ pip install fastapi uvicorn torch torchvision pillow python-multipart
 ```
 
 
-API 서버 실행
+### API 서버 실행
 
 프로젝트 파일 이름이 main.py라고 가정할 때, 커맨드 프롬프트(혹은 터미널)에서 다음 명령어를 입력하여 서버를 시작합니다.
 
